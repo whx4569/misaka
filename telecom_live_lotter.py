@@ -26,6 +26,7 @@ from tools.ql_api import get_envs, disable_env, post_envs, put_envs
 from tools.tool import timestamp, get_environ, print_now
 from tools.send_msg import push
 from china_telecom import ChinaTelecom
+import threading
 
 class TelecomLotter:
     def __init__(self, phone, password):
@@ -179,14 +180,19 @@ def main(phone, password):
         url = "https://gitee.com/kele2233/genxin/raw/master/telecomLiveInfo.json"
         data = get(url, timeout=5).json()
     except:
-        url = "https://xbk.189.cn/xbkapi/lteration/index/recommend/anchorRecommend?provinceCode=01"
-        random_phone = f"1537266{randint(1000, 9999)}"
-        headers = {
-            "referer": "https://xbk.189.cn/xbk/newHome?version=9.4.0&yjz=no&l=card&longitude=%24longitude%24&latitude=%24latitude%24&utm_ch=hg_app&utm_sch=hg_sh_shdbcdl&utm_as=xbk_tj&loginType=1",
-            "user-agent": f"CtClient;9.6.1;Android;12;SM-G9860;{b64encode(random_phone[5:11].encode()).decode().strip('=+')}!#!{b64encode(random_phone[0:5].encode()).decode().strip('=+')}"
-        }
-        data = get(url, headers=headers).json()
-        apiType = 2
+        try:
+            url = "https://raw.githubusercontent.com/limoruirui/Hello-Wolrd/main/telecomLiveInfo.json"
+            #url = "https://api.ruirui.fun/telecom/getLiveInfo"
+            data = get(url, timeout=5).json()
+        except:
+            url = "https://xbk.189.cn/xbkapi/lteration/index/recommend/anchorRecommend?provinceCode=01"
+            random_phone = f"1537266{randint(1000, 9999)}"
+            headers = {
+                "referer": "https://xbk.189.cn/xbk/newHome?version=9.4.0&yjz=no&l=card&longitude=%24longitude%24&latitude=%24latitude%24&utm_ch=hg_app&utm_sch=hg_sh_shdbcdl&utm_as=xbk_tj&loginType=1",
+                "user-agent": f"CtClient;9.6.1;Android;12;SM-G9860;{b64encode(random_phone[5:11].encode()).decode().strip('=+')}!#!{b64encode(random_phone[0:5].encode()).decode().strip('=+')}"
+            }
+            data = get(url, headers=headers).json()
+            apiType = 2
     print(data)
     liveListInfo = {}
     allLiveInfo = data.values() if apiType == 1 else data["data"]
@@ -203,6 +209,8 @@ def main(phone, password):
     now = datetime.now()
     if now.hour == 12 + int(strftime("%z")[2]) and now.minute > 10:
         TelecomLotter(phone, password).find_price()
+      
+
 #获取ck
 def get_cookie():
     ck_list = []
@@ -216,7 +224,19 @@ def get_cookie():
         print('共配置{}条CK,请添加环境变量,或查看环境变量状态'.format(len(ck_list)))
     return ck_list 
 
+
+def start(phone,password):
+    if phone == "" or password == "":
+        print("未填写相应变量 退出")
+        exit(0)
+    main(phone, password)
+    print("\n")
+
+
+
+
 if __name__ == '__main__':
+    l = []
     user_map = get_cookie()
     for i in range(len(user_map)):
         phone=""
@@ -229,6 +249,9 @@ if __name__ == '__main__':
         if phone == "" or password == "":
             print("未填写相应变量 退出")
             exit(0)
-        main(phone, password)
+        p = threading.Thread(target=start,args=(phone,password))
+        l.append(p)
+        p.start()
         print("\n")
-
+    for i in l:
+        i.join()
