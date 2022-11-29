@@ -446,8 +446,8 @@ if __name__ == '__main__':
             phone = userinfo[0]
             password = userinfo[1]
         print('开始执行第{}个账号：{}'.format((i+1),phone))
-        if phone == "" or password == "":
-            print("当前账号未填写手机号或者密码 跳过")
+        if phone == "":
+            print("当前账号未填写手机号 跳过")
             print("\n")
             continue
         p = threading.Thread(target=start,args=(phone,password))
