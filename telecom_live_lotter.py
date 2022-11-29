@@ -11,6 +11,7 @@
 2. 环境变量说明:
    变量名(必须)：  TELECOM_PHONE_PASSWORD
    格式： 手机号&服务密码，1317xxx1322&123456
+   单个CK塞多个账号时，以#分隔开：手机号&服务密码#手机号&服务密码，1317xxx1322&123456#1317xxx1322&123456
 3. 必须登录过 电信营业厅 app的账号才能正常运行
 """
 import re
@@ -214,7 +215,6 @@ def main(phone, password):
 #获取ck
 def get_cookie():
     ck_list = []
-    pin = "null"
     cookie = None
     cookies = get_envs("TELECOM_PHONE_PASSWORD")
     for ck in cookies:
@@ -237,7 +237,22 @@ def start(phone,password):
 
 if __name__ == '__main__':
     l = []
-    user_map = get_cookie()
+    user_map = []
+    cklist = get_cookie()
+    for i in range(len(cklist)):
+        #以#分割开的ck
+        split1 = cklist[i].split("#")
+        if len(split1)>1:
+            for j in range(len(split1)):
+                split2 = split1[j].split("&")
+                if len(split2)>1:
+                    user_map.append(split1[j])
+        userinfo = cklist[i].split("&")
+        if len(userinfo)>1:
+            user_map.append(cklist[i])
+
+
+
     for i in range(len(user_map)):
         phone=""
         password=""
