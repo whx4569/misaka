@@ -34,6 +34,7 @@ from tools.ql_api import get_envs, disable_env, post_envs, put_envs
 from tools.send_msg import push
 from login.telecom_login import TelecomLogin
 from string import ascii_letters, digits
+import threading
 
 
 
@@ -412,7 +413,29 @@ def get_cookie():
         print('共配置{}条CK,请添加环境变量,或查看环境变量状态'.format(len(ck_list)))
     return ck_list 
 
-if __name__ == "__main__":
+
+
+
+def start(phone,password):
+    if phone == "":
+        exit(0)
+    if password == "":
+        print_now("电信服务密码未提供 只执行部分任务")
+    if datetime.now().hour + (8 - int(strftime("%z")[2])) == 12:
+        telecom = ChinaTelecom(phone, password, False)
+        telecom.init()
+        telecom.convert_reward()
+    else:
+        telecom = ChinaTelecom(phone, password)
+        telecom.main()
+    print("\n")
+    print("\n")
+
+
+
+
+if __name__ == '__main__':
+    l = []
     user_map = get_cookie()
     foods = int(float(get_environ("TELECOM_FOOD", 0, False)))
     for i in range(len(user_map)):
@@ -423,16 +446,16 @@ if __name__ == "__main__":
             phone = userinfo[0]
             password = userinfo[1]
         print('开始执行第{}个账号：{}'.format((i+1),phone))
-        if phone == "":
-            exit(0)
-        if password == "":
-            print_now("电信服务密码未提供 只执行部分任务")
-        if datetime.now().hour + (8 - int(strftime("%z")[2])) == 12:
-            telecom = ChinaTelecom(phone, password, False)
-            telecom.init()
-            telecom.convert_reward()
-        else:
-            telecom = ChinaTelecom(phone, password)
-            telecom.main()
+        if phone == "" or password == "":
+            print("当前账号未填写手机号或者密码 跳过")
+            print("\n")
+            continue
+        p = threading.Thread(target=start,args=(phone,password))
+        l.append(p)
+        p.start()
         print("\n")
-        print("\n")
+    for i in l:
+        i.join()
+
+
+        
