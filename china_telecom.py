@@ -446,9 +446,10 @@ if __name__ == '__main__':
                 split2 = split1[j].split("&")
                 if len(split2)>1:
                     user_map.append(split1[j])
-        userinfo = cklist[i].split("&")
-        if len(userinfo)>1:
-            user_map.append(cklist[i])
+        else:
+            userinfo = cklist[i].split("&")
+            if len(userinfo)>1:
+                user_map.append(cklist[i])
 
 
     foods = int(float(get_environ("TELECOM_FOOD", 0, False)))
