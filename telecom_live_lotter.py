@@ -28,6 +28,9 @@ from tools.tool import timestamp, get_environ, print_now
 from tools.send_msg import push
 from china_telecom import ChinaTelecom
 import threading
+import time
+import requests
+import json
 
 class TelecomLotter:
     def __init__(self, phone, password):
@@ -131,8 +134,8 @@ class TelecomLotter:
             active_code2 = self.get_action_id_other(liveId)
             if active_code1 is not None or active_code2 is not None:
                 break
-            print(f"此直播间暂无抽奖活动, 等待90秒后再次查询 剩余查询次数{7 - i}")
-            await sleep(90)
+            print(f"此直播间暂无抽奖活动, 等待10秒后再次查询 剩余查询次数{7 - i}")
+            await sleep(10)
             continue
         if active_code1 is None and active_code2 is None:
             print("查询结束 本直播间暂无抽奖活动")
@@ -175,25 +178,69 @@ class TelecomLotter:
         else:
             print(f"获取奖品信息失败, 接口返回" + str(data))
 
+
+
+
+def get_data():
+    print('正在加载今日直播数据ing...')  
+    all_list = []
+    code = 1
+    for i in range(35):
+        if code < 10:
+            code_str = '0' + str(code)
+        else:
+            code_str = str(code)
+        url = f'https://xbk.189.cn/xbkapi/lteration/index/recommend/anchorRecommend?provinceCode={code_str}'
+        random_phone = f"1537266{randint(1000, 9999)}"
+        headers = {
+            "referer": "https://xbk.189.cn/xbk/newHome?version=9.4.0&yjz=no&l=card&longitude=%24longitude%24&latitude=%24latitude%24&utm_ch=hg_app&utm_sch=hg_sh_shdbcdl&utm_as=xbk_tj&loginType=1",
+            "user-agent": f"CtClient;9.6.1;Android;12;SM-G9860;{b64encode(random_phone[5:11].encode()).decode().strip('=+')}!#!{b64encode(random_phone[0:5].encode()).decode().strip('=+')}"
+        }
+        # print(url)
+        data = requests.get(url, headers=headers).json()
+        body = data["data"]
+        for i in body:
+            if time.strftime('%Y-%m-%d') in i['start_time']:
+                if i not in all_list:              
+                    print('今日开播时间：'+i['start_time']+' 直播间名称：'+i['nickname'] ) 
+                    all_list.append(i)
+        code += 1
+    list = {}
+    f = 1
+    for i in all_list:
+        list['liveRoom' + str(f)] = i
+        f += 1
+    print('直播数据加载完毕')
+    print('\n')
+    return list
+
+
+
+
+
 def main(phone, password):
     apiType = 1
-    try:
-        url = "https://gitee.com/kele2233/genxin/raw/master/telecomLiveInfo.json"
-        data = get(url, timeout=5).json()
-    except:
-        try:
-            url = "https://raw.githubusercontent.com/limoruirui/Hello-Wolrd/main/telecomLiveInfo.json"
-            #url = "https://api.ruirui.fun/telecom/getLiveInfo"
-            data = get(url, timeout=5).json()
-        except:
-            url = "https://xbk.189.cn/xbkapi/lteration/index/recommend/anchorRecommend?provinceCode=01"
-            random_phone = f"1537266{randint(1000, 9999)}"
-            headers = {
-                "referer": "https://xbk.189.cn/xbk/newHome?version=9.4.0&yjz=no&l=card&longitude=%24longitude%24&latitude=%24latitude%24&utm_ch=hg_app&utm_sch=hg_sh_shdbcdl&utm_as=xbk_tj&loginType=1",
-                "user-agent": f"CtClient;9.6.1;Android;12;SM-G9860;{b64encode(random_phone[5:11].encode()).decode().strip('=+')}!#!{b64encode(random_phone[0:5].encode()).decode().strip('=+')}"
-            }
-            data = get(url, headers=headers).json()
-            apiType = 2
+    #切换使用直接加载方式
+    data = getData
+    # try:
+    #     url = "https://gitee.com/kele2233/genxin/raw/master/telecomLiveInfo.json"
+    #     data = get(url, timeout=5).json()
+    # except:
+    #     print("主直播接口失效，进入备用抓包接口")
+    #     data = list_d
+    #     # try:
+    #     #     url = "https://raw.githubusercontent.com/limoruirui/Hello-Wolrd/main/telecomLiveInfo.json"
+    #     #     #url = "https://api.ruirui.fun/telecom/getLiveInfo"
+    #     #     data = get(url, timeout=5).json()
+    #     # except:
+    #     #     url = "https://xbk.189.cn/xbkapi/lteration/index/recommend/anchorRecommend?provinceCode=01"
+    #     #     random_phone = f"1537266{randint(1000, 9999)}"
+    #     #     headers = {
+    #     #         "referer": "https://xbk.189.cn/xbk/newHome?version=9.4.0&yjz=no&l=card&longitude=%24longitude%24&latitude=%24latitude%24&utm_ch=hg_app&utm_sch=hg_sh_shdbcdl&utm_as=xbk_tj&loginType=1",
+    #     #         "user-agent": f"CtClient;9.6.1;Android;12;SM-G9860;{b64encode(random_phone[5:11].encode()).decode().strip('=+')}!#!{b64encode(random_phone[0:5].encode()).decode().strip('=+')}"
+    #     #     }
+    #     #     data = get(url, headers=headers).json()
+    #     #     apiType = 2
     print(data)
     liveListInfo = {}
     allLiveInfo = data.values() if apiType == 1 else data["data"]
@@ -236,6 +283,10 @@ def start(phone,password):
 
 
 if __name__ == '__main__':
+    #加载今日直播信息
+    getData=get_data()
+
+
     l = []
     user_map = []
     cklist = get_cookie()
