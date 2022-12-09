@@ -1,7 +1,7 @@
 import json, os
 import time
 
-import requests
+import requests,re
 
 ql_auth_path = '/ql/data/config/auth.json'
 ql_config_path = '/ql/data/config/config.sh'
@@ -67,14 +67,12 @@ def get_config_and_envs(name: str = None) -> list:
             if  not  line  :
                 break;
             #print(line.strip())
-            exportinfo = line.strip()
+            exportinfo = line.strip().replace("\"","").replace("\'","")
             #去除注释#行
-            exportinfolist = exportinfo.split("#")
-            #print('exportinfolistd的长度：{}'.format(len(exportinfolist)))
-            if len(exportinfolist) < 2 :
-                #去除首尾空格、单引号和双引号
-                exportinfo = exportinfolist[0].strip().replace("\"","").replace("\'","")
-            else:
+            rm_str_list = re.findall(r'^#(.+?)', exportinfo,re.DOTALL)
+            #print('rm_str_list数据：{}'.format(rm_str_list))
+            exportinfolist = []
+            if len(rm_str_list) == 1:
                 exportinfo = ""
             #list_all = re.findall(r'export[ ](.+?)', exportinfo,re.DOTALL)
             #print('exportinfo数据：{}'.format(exportinfo))
@@ -85,9 +83,10 @@ def get_config_and_envs(name: str = None) -> list:
                 #以=分割，查找需要的环境名字
                 tmp = list_all[1].split("=")
                 if len(tmp) > 1:
-                    #print('tmp数据：{}'.format(tmp))
+                    
                     info = tmp[0]
                     if name in info:
+                        #print('需要查询的环境数据：{}'.format(tmp))
                         data_tmp = []
                         data_json = {
                             'id': None,
