@@ -31,7 +31,7 @@ from base64 import b64encode
 from tools.aes_encrypt import AES_Ctypt
 from tools.rsa_encrypt import RSA_Encrypt
 from tools.tool import timestamp, get_environ, print_now
-from tools.ql_api import get_envs, get_config_and_envs, disable_env, post_envs, put_envs
+from tools.ql_api import get_cookie
 from tools.send_msg import push
 from login.telecom_login import TelecomLogin
 from string import ascii_letters, digits
@@ -401,17 +401,6 @@ class ChinaTelecom:
         return False
 
 
-#获取ck
-def get_cookie():
-    ck_list = []
-    cookie = None
-    cookies = get_config_and_envs("TELECOM_PHONE_PASSWORD")
-    for ck in cookies:
-        if ck.get('status') == 0:
-            ck_list.append(ck.get('value'))
-    if len(ck_list) < 1:
-        print('共配置{}条CK,请添加环境变量,或查看环境变量状态'.format(len(ck_list)))
-    return ck_list 
 
 
 
@@ -437,7 +426,7 @@ def start(phone,password):
 if __name__ == '__main__':
     l = []
     user_map = []
-    cklist = get_cookie()
+    cklist = get_cookie("TELECOM_PHONE_PASSWORD")
     for i in range(len(cklist)):
         #以#分割开的ck
         split1 = cklist[i].split("#")
@@ -452,7 +441,7 @@ if __name__ == '__main__':
                 user_map.append(cklist[i])
 
 
-    foods = int(float(get_environ("TELECOM_FOOD", 0, False)))
+    foods = int(float(get_cookie("TELECOM_FOOD", 0, False)))
     for i in range(len(user_map)):
         phone=""
         password=""
@@ -472,5 +461,4 @@ if __name__ == '__main__':
     for i in l:
         i.join()
 
-
-        
+ 
