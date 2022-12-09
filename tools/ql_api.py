@@ -76,8 +76,8 @@ def get_config_and_envs(name: str = None) -> list:
                 exportinfo = ""
             #list_all = re.findall(r'export[ ](.+?)', exportinfo,re.DOTALL)
             #print('exportinfo数据：{}'.format(exportinfo))
-            #以空格分隔，数组0为export，数组1为后面需要的数据
-            list_all = exportinfo.split(" ")
+            #以export分隔，字符前面新增标记作为数组0，数组1为后面需要的数据
+            list_all = ("标记"+exportinfo.replace(" ","").replace(" ","")).split("export")
             #print('list_all数据：{}'.format(list_all))
             if len(list_all) > 1:
                 #以=分割，查找需要的环境名字
