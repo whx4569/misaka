@@ -31,7 +31,7 @@ from base64 import b64encode
 from tools.aes_encrypt import AES_Ctypt
 from tools.rsa_encrypt import RSA_Encrypt
 from tools.tool import timestamp, get_environ, print_now
-from tools.ql_api import get_envs, disable_env, post_envs, put_envs
+from tools.ql_api import get_envs, get_config_and_envs, disable_env, post_envs, put_envs
 from tools.send_msg import push
 from login.telecom_login import TelecomLogin
 from string import ascii_letters, digits
@@ -405,7 +405,7 @@ class ChinaTelecom:
 def get_cookie():
     ck_list = []
     cookie = None
-    cookies = get_envs("TELECOM_PHONE_PASSWORD")
+    cookies = get_config_and_envs("TELECOM_PHONE_PASSWORD")
     for ck in cookies:
         if ck.get('status') == 0:
             ck_list.append(ck.get('value'))
