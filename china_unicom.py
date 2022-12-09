@@ -255,15 +255,15 @@ class China_Unicom:
 
 
 #获取ck
-def get_cookie():
+def get_cookie(name):
     ck_list = []
     cookie = None
-    cookies = get_config_and_envs("PHONE_NUM")
+    cookies = get_config_and_envs(name)
     for ck in cookies:
         if ck.get('status') == 0:
             ck_list.append(ck.get('value'))
     if len(ck_list) < 1:
-        print('共配置{}条CK,请添加环境变量,或查看环境变量状态'.format(len(ck_list)))
+        print('变量{}共配置{}条CK,请添加环境变量,或查看环境变量状态'.format(name,len(ck_list)))
     return ck_list 
 
         
@@ -278,11 +278,16 @@ def start(phone):
     
         
 if __name__ == "__main__":
-    unicom_lotter = get_environ("UNICOM_LOTTER", default=True)
+    #unicom_lotter = get_environ("UNICOM_LOTTER", default=True)
+    
     """读取环境变量"""
     l = []
     user_map = []
-    cklist = get_cookie()
+    cklist = get_cookie("PHONE_NUM")
+    unicom_lotter_list = get_cookie("UNICOM_LOTTER")
+    unicom_lotter = True
+    if len(unicom_lotter_list) > 1:
+        unicom_lotter = unicom_lotter_list[0]
     for i in range(len(cklist)):
         #以#分割开的ck
         split1 = cklist[i].split("&")
