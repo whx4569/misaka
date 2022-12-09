@@ -418,7 +418,6 @@ def start(phone,password):
         telecom = ChinaTelecom(phone, password)
         telecom.main()
     print("\n")
-    print("\n")
 
 
 
@@ -441,7 +440,12 @@ if __name__ == '__main__':
                 user_map.append(cklist[i])
 
 
-    foods = int(float(get_cookie("TELECOM_FOOD", 0, False)))
+                
+    num_list = get_cookie("TELECOM_FOOD", 0, False)
+    num = ""
+    if len(num_list)>0:
+        num = num_list[0]
+    foods = int(float(num))
     for i in range(len(user_map)):
         phone=""
         password=""
@@ -460,5 +464,3 @@ if __name__ == '__main__':
         print("\n")
     for i in l:
         i.join()
-
- 
