@@ -34,7 +34,7 @@ from tools.encrypt_symmetric import Crypt
 from tools.send_msg import push
 from tools.tool import get_environ, random_sleep
 #random_sleep(0, 1600)
-from tools.ql_api import get_envs, get_config_and_envs, disable_env, post_envs, put_envs
+from tools.ql_api import get_cookie
 import threading
 
 """主类"""
@@ -254,17 +254,6 @@ class China_Unicom:
         exit(0)
 
 
-#获取ck
-def get_cookie(name):
-    ck_list = []
-    cookie = None
-    cookies = get_config_and_envs(name)
-    for ck in cookies:
-        if ck.get('status') == 0:
-            ck_list.append(ck.get('value'))
-    if len(ck_list) < 1:
-        print('变量{}共配置{}条CK,请添加环境变量,或查看环境变量状态'.format(name,len(ck_list)))
-    return ck_list 
 
         
 def start(phone):
@@ -278,16 +267,12 @@ def start(phone):
     
         
 if __name__ == "__main__":
-    #unicom_lotter = get_environ("UNICOM_LOTTER", default=True)
+    unicom_lotter = get_environ("UNICOM_LOTTER", default=True)
     
     """读取环境变量"""
     l = []
     user_map = []
     cklist = get_cookie("PHONE_NUM")
-    unicom_lotter_list = get_cookie("UNICOM_LOTTER")
-    unicom_lotter = True
-    if len(unicom_lotter_list) > 1:
-        unicom_lotter = unicom_lotter_list[0]
     for i in range(len(cklist)):
         #以#分割开的ck
         split1 = cklist[i].split("&")
