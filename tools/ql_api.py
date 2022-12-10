@@ -1,5 +1,6 @@
 import json, os
 import time
+from sys import stdout
 
 import requests,re
 
@@ -50,6 +51,11 @@ def get_cookie_data(name):
     if len(ck_list) < 1:
         print('变量{}共配置{}条CK,请添加环境变量,或查看环境变量状态'.format(name,len(ck_list)))
     return ck_list 
+
+# 修改print方法 避免某些环境下python执行print 不会去刷新缓存区导致信息第一时间不及时输出
+def print_now(content):
+    print(content)
+    stdout.flush()
 
 
 # 查询环境变量
