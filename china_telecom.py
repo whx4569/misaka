@@ -442,7 +442,7 @@ if __name__ == '__main__':
 
                 
     num_list = get_cookie("TELECOM_FOOD", 0, False)
-    num = ""
+    num = "0"
     if len(num_list)>0:
         num = num_list[0]
     foods = int(float(num))
