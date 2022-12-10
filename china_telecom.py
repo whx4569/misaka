@@ -443,9 +443,11 @@ if __name__ == '__main__':
                 
     num_list = get_cookie("TELECOM_FOOD", 0, False)
     num = 0
-    if num_list>0:
-        num = num_list[0]
+    if num_list != 0:
+        if len(num_list)>0:
+            num = num_list[0]
     foods = int(float(num))
+    print(foods)
     for i in range(len(user_map)):
         phone=""
         password=""
