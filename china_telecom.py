@@ -447,7 +447,6 @@ if __name__ == '__main__':
         if len(num_list)>0:
             num = num_list[0]
     foods = int(float(num))
-    print(foods)
     for i in range(len(user_map)):
         phone=""
         password=""
