@@ -4,7 +4,7 @@
 复制链接浏览器打开：https://m.360buyimg.com/babel/jfs/t1/92036/6/19877/112205/6395f615E345e78a8/54de5ad81ae58017.png
 #小程序://起飞线生活
 
-corn 0 1-23/3 * * *
+0 1-23/3 * * *  qfxhd.js, tag=起飞线生活
 
 抓取cluster.qifeixian.com域名
 查看请求头的x-ds-key
