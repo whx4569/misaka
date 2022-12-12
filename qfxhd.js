@@ -14,7 +14,7 @@
 [task_local]
 #今日越城
 0 1-23/3 * * * https://raw.githubusercontent.com/yuanter/misaka/master/qfxhd.js, tag=起飞线生活, enabled=true
-
+cron: 0 1-23/3 * * *
 const $ = new Env('起飞线生活');
 */
 
