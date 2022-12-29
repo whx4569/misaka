@@ -3,7 +3,7 @@
 # -------------------------------
 # @Author : github@limoruirui https://github.com/limoruirui  by院长修改
 # @Time : 2022/9/12 16:10
-# cron "1 9,12 * * *" script-path=xxx.py,tag=匹配cron用
+# cron "0 9,12 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('电信签到');
 # -------------------------------
 
