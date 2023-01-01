@@ -10,15 +10,15 @@
 联通app抽奖 入口:联通app 搜索 阅读专区 进入话费派送中
 1. 脚本仅供学习交流使用, 请在下载后24h内删除
 2. 需要第三方库 pycryptodome 支持 命令行安装 pip3 install pycryptodome或者根据自己环境自行安装
-3. 环境变量说明 PHONE_NUM(必需) UNICOM_LOTTER(选填) UNICOM_USERAGENT(选填) 自行新建环境变量添加
-    PHONE_NUM 为你的手机号  多账号使用&隔开
+3. 环境变量说明 PHONE_NUM(必需) UNICOM_LOTTER(选填) 自行新建环境变量添加
+    PHONE_NUM  格式：手机号#UA     多账号使用&隔开    UA(选填) 为联通app的useragent 随便一个数据包的请求头里应该都有 建议自己抓一个填上 不填也能跑 数据内容参考 line 46 双引号的内容
+    UA例子：Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 unicom{version:iphone_c@10.0001}
     UNICOM_LOTTER 默认自动抽奖, 若不需要 则添加环境变量值为 False
-    UNICOM_USERAGENT 联通app的useragent 随便一个数据包的请求头里应该都有 建议自己抓一个填上 不填也能跑 数据内容参考 line 46 双引号的内容
     推送通知的变量同青龙 只写了tgbot(支持反代api)和pushplus
 """
 """
 updateTime: 2023.1.1  log: 更新aes加密key
-updateTime: 2022.12.1  log: 活动重新上架 改用 pycryptodome 替代 cryptography 进行aes加密
+updateTime: 2022.12.1 log: 活动重新上架 改用 pycryptodome 替代 cryptography 进行aes加密
 updateTime: 2022.9.1  log: 每个月活动id改变更新
 """
 
@@ -41,10 +41,14 @@ import threading
 
 """主类"""
 class China_Unicom:
-    def __init__(self, phone_num):
+    def __init__(self, phone_num, run_ua):
         self.phone_num = phone_num
         default_ua = f"Mozilla/5.0 (Linux; Android {randint(8, 13)}; SM-S908U Build/TP1A.220810.014; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/{randint(95, 108)}.0.5359.128 Mobile Safari/537.36; unicom{{version:android@9.0{randint(0,6)}00,desmobile:{self.phone_num}}};devicetype{{deviceBrand:,deviceModel:}};{{yw_code:}}"
-        run_ua = get_environ(key="UNICOM_USERAGENT", default=default_ua, output=False)
+        #run_ua = get_environ(key="UNICOM_USERAGENT", default=default_ua, output=False)
+        if run_ua is None or run_ua == "":
+            run_ua = default_ua
+        # print("使用的UA："+run_ua)
+
         self.headers = {
             "Host": "10010.woread.com.cn",
             "Accept": "application/json, text/plain, */*",
@@ -254,10 +258,10 @@ class China_Unicom:
 
 
         
-def start(phone):
+def start(phone,run_ua):
     if phone == "":
         exit(0)
-    China_Unicom(phone).main()
+    China_Unicom(phone,run_ua).main()
     print("\n")
     print("\n")        
 
@@ -279,18 +283,25 @@ if __name__ == "__main__":
                 user_map.append(split1[j])
         else:
             user_map.append(cklist[i])
+
     
-   
     
     for i in range(len(user_map)):
         phone=""
-        phone = user_map[i].split("&")[0]
+        info = user_map[i].split("&")[0]
+        #以#分割开的ck
+        split1 = info.split("#")
+        run_ua = ""
+        phone = split1[0]
+        if len(split1)>1:
+            run_ua = split1[1] + f";devicetype{{deviceBrand:,deviceModel:}};{{yw_code:}}"
+
         print('开始执行第{}个账号：{}'.format((i+1),phone))
         if phone == "":
             print("当前账号未填写手机号 跳过")
             print("\n")
             continue
-        p = threading.Thread(target=start,args=(phone,))
+        p = threading.Thread(target=start,args=(phone, run_ua))
         l.append(p)
         p.start()
         print("\n")
