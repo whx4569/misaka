@@ -11,7 +11,7 @@
 1. 脚本仅供学习交流使用, 请在下载后24h内删除
 2. 需要第三方库 pycryptodome 支持 命令行安装 pip3 install pycryptodome或者根据自己环境自行安装
 3. 环境变量说明 PHONE_NUM(必需) UNICOM_LOTTER(选填) 自行新建环境变量添加
-    PHONE_NUM  格式：手机号#UA     多账号使用&隔开    UA(选填) 为联通app的useragent 随便一个数据包的请求头里应该都有 建议自己抓一个填上 不填也能跑 数据内容参考 line 46 双引号的内容
+    PHONE_NUM  格式：手机号#UA     多账号使用&隔开    UA(选填) 为联通app的useragent 随便一个数据包的请求头里应该都有 建议自己抓一个填上 不填也能跑 数据内容参考 line 49 双引号的内容
     UA例子：Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 unicom{version:iphone_c@10.0001}
     UNICOM_LOTTER 默认自动抽奖, 若不需要 则添加环境变量值为 False
     推送通知的变量同青龙 只写了tgbot(支持反代api)和pushplus
@@ -31,13 +31,16 @@ from os import environ
 from sys import stdout, exit
 from base64 import b64encode
 from json import dumps
-
+from notify import send
 from tools.encrypt_symmetric import Crypt
 from tools.send_msg import push
 from tools.tool import get_environ, random_sleep
 #random_sleep(0, 1600)
 from tools.ql_api import get_cookie
 import threading
+
+
+msg_str = ""
 
 """主类"""
 class China_Unicom:
@@ -165,7 +168,7 @@ class China_Unicom:
         data = self.req(url, crypt_text)
         total_score = data["data"]["validScore"]
         self.lotter_num = int(total_score / 50)
-        self.print_now(f"你的账号当前有积分{total_score}, 可以抽奖{self.lotter_num}次")
+        self.print_now(f"你的账号{self.phone_num}当前有积分{total_score}, 可以抽奖{self.lotter_num}次")
 
     def get_activetion_id(self):
         url = "https://10010.woread.com.cn/ng_woread_service/rest/activity/yearEnd/queryActiveInfo"
@@ -236,6 +239,7 @@ class China_Unicom:
         print(data)
 
     def query_red(self):
+        global msg_str #声明我们在函数内部使用的是在函数外部定义的全局变量a
         url = "https://10010.woread.com.cn/ng_woread_service/rest/phone/vouchers/queryTicketAccount"
         date = datetime.today().__format__("%Y%m%d%H%M%S")
         crypt_text = f'{{"timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
@@ -243,11 +247,13 @@ class China_Unicom:
         if data["code"] == "0000":
             can_use_red = data["data"]["usableNum"] / 100
             if can_use_red >= 3:
-                self.print_now(f"查询成功 你当前有话费红包{can_use_red} 可以去兑换了")
-                push("某通阅读", f"查询成功 你当前有话费红包{can_use_red} 可以去兑换了")
+                self.print_now(f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 可以去兑换了")
+                push("某通阅读", f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 可以去兑换了")
+                msg_str += f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 可以去兑换了\n\n"
             else:
-                self.print_now(f"查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
-                push("某通阅读", f"查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
+                self.print_now(f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
+                push("某通阅读", f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
+                msg_str += f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度\n\n"
 
     def main(self):
         self.referer_login()
@@ -316,3 +322,4 @@ if __name__ == "__main__":
         print("\n")
     for i in l:
         i.join()
+    send("联通阅读",msg_str)
