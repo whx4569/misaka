@@ -14,7 +14,6 @@
     PHONE_NUM  格式：手机号#UA     多账号使用&隔开    UA(选填) 为联通app的useragent 随便一个数据包的请求头里应该都有 建议自己抓一个填上 不填也能跑 数据内容参考 line 49 双引号的内容
     UA例子：Mozilla/5.0 (iPhone; CPU iPhone OS 15_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 unicom{version:iphone_c@10.0001}
     UNICOM_LOTTER 默认自动抽奖, 若不需要 则添加环境变量值为 False
-    推送通知的变量同青龙 只写了tgbot(支持反代api)和pushplus
 """
 """
 updateTime: 2023.1.1  log: 更新aes加密key
@@ -38,6 +37,7 @@ from tools.tool import get_environ, random_sleep
 #random_sleep(0, 1600)
 from tools.ql_api import get_cookie
 import threading
+
 
 
 msg_str = ""
@@ -121,6 +121,7 @@ class China_Unicom:
             exit(0)
 
     def watch_video(self):
+        global msg_str #声明我们在函数内部使用的是在函数外部定义的全局变量msg_str
         self.print_now("看广告获取积分任务: ")
         url = "https://10010.woread.com.cn/ng_woread_service/rest/activity/yearEnd/obtainScoreByAd"
         date = datetime.today().__format__("%Y%m%d%H%M%S")
@@ -130,7 +131,8 @@ class China_Unicom:
             self.print_now(data)
             if self.fail_num == 3:
                 self.print_now("当前任务出现异常 且错误次数达到3次 请手动检查")
-                push("某通阅读", "当前任务出现异常 且错误次数达到3次 请手动检查")
+                # push("某通阅读", "当前任务出现异常 且错误次数达到3次 请手动检查")
+                msg_str += f"账号{self.phone_num}当前任务出现异常 且错误次数达到3次 请手动检查\n\n"
                 exit(0)
             if data["code"] == "9999":
                 self.print_now("当前任务出现异常 正在重新执行")
@@ -141,6 +143,7 @@ class China_Unicom:
         return True
 
     def read_novel(self):
+        global msg_str #声明我们在函数内部使用的是在函数外部定义的全局变量msg_str
         self.get_cardid()
         self.get_cntindex()
         self.get_chapterallindex()
@@ -153,7 +156,8 @@ class China_Unicom:
             data = self.req(url, crypt_text)
             if self.fail_num == 3:
                 self.print_now("当前任务出现异常 且错误次数达到3次 请手动检查")
-                push("某通阅读", "阅读任务出现异常 且错误次数达到3次 请手动检查")
+                # push("某通阅读", "阅读任务出现异常 且错误次数达到3次 请手动检查")
+                msg_str += f"账号{self.phone_num}阅读任务出现异常 且错误次数达到3次 请手动检查\n\n"
                 exit(0)
             if data.get("code") != "0000":
                 self.print_now("阅读小说发生异常, 正在重新登录执行, 接口返回")
@@ -239,7 +243,7 @@ class China_Unicom:
         print(data)
 
     def query_red(self):
-        global msg_str #声明我们在函数内部使用的是在函数外部定义的全局变量a
+        global msg_str #声明我们在函数内部使用的是在函数外部定义的全局变量msg_str
         url = "https://10010.woread.com.cn/ng_woread_service/rest/phone/vouchers/queryTicketAccount"
         date = datetime.today().__format__("%Y%m%d%H%M%S")
         crypt_text = f'{{"timestamp":"{date}","token":"{self.userinfo["token"]}","userId":"{self.userinfo["userid"]}","userIndex":{self.userinfo["userindex"]},"userAccount":"{self.userinfo["phone"]}","verifyCode":"{self.userinfo["verifycode"]}"}}'
@@ -248,11 +252,11 @@ class China_Unicom:
             can_use_red = data["data"]["usableNum"] / 100
             if can_use_red >= 3:
                 self.print_now(f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 可以去兑换了")
-                push("某通阅读", f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 可以去兑换了")
+                # push("某通阅读", f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 可以去兑换了")
                 msg_str += f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 可以去兑换了\n\n"
             else:
                 self.print_now(f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
-                push("某通阅读", f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
+                # push("某通阅读", f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度")
                 msg_str += f"账号{self.phone_num}查询成功 你当前有话费红包{can_use_red} 不足兑换的最低额度\n\n"
 
     def main(self):
