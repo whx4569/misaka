@@ -8,7 +8,11 @@
 # -------------------------------
 """
 1. 脚本仅供学习交流使用, 请在下载后24h内删除
-2. 星播客手动抽奖，只添加直播时间，具体查看日志和消息推送
+2. 环境变量说明:
+   变量名(必须)：  TELECOM_PHONE_PASSWORD
+   格式： 手机号&服务密码，1317xxx1322&123456
+   单个CK塞多个账号时，以#分隔开：手机号&服务密码#手机号&服务密码，1317xxx1322&123456#1317xxx1322&123456
+3. 必须登录过 电信营业厅 app的账号才能正常运行
 """
 import re
 from random import randint
@@ -28,7 +32,7 @@ import time
 import requests
 import json
 
-from notify import send
+from tools.notify import send
 
 class TelecomLotter:
     def __init__(self, phone, password):
@@ -201,10 +205,10 @@ def get_data():
         for i in body:
             if time.strftime('%Y-%m-%d') in i['start_time']:
                 if i not in all_list:              
-                    # print('今日开播时间：'+i['start_time']+' 直播间名称：'+i['nickname'] ) 
-                    # print('安卓浏览器直接打开链接  ctclient://startapp/android/open?LinkType=5&Link=https://xbk.189.cn/xbk/livingRoom?liveId='+str(i['liveId']) ) 
-                    # print('直接打开链接  https://xbk.189.cn/xbk/livingRoom?liveId='+str(i['liveId']) ) 
-                    # print('\n')
+                    print('今日开播时间：'+i['start_time']+' 直播间名称：'+i['nickname'] ) 
+                    print('安卓浏览器直接打开链接  ctclient://startapp/android/open?LinkType=5&Link=https://xbk.189.cn/xbk/livingRoom?liveId='+str(i['liveId']) ) 
+                    print('直接打开链接  https://xbk.189.cn/xbk/livingRoom?liveId='+str(i['liveId']) ) 
+                    print('\n\n')
                     msg_str += '今日开播时间：'+i['start_time']+' 直播间名称：'+i['nickname']+'\n安卓浏览器直接打开链接：\nctclient://startapp/android/open?LinkType=5&Link=https://xbk.189.cn/xbk/livingRoom?liveId='+str(i['liveId'])+'\n直接打开链接：\nhttps://xbk.189.cn/xbk/livingRoom?liveId='+str(i['liveId'])+'\n\n'
                     all_list.append(i)
         code += 1
@@ -214,7 +218,7 @@ def get_data():
         list['liveRoom' + str(f)] = i
         f += 1
     print('直播数据加载完毕')
-    print('\n')
+    print('\n\n')
     #发送消息
     send('电信星播客直播通知', msg_str)
     return list
